@@ -12,7 +12,7 @@ export async function askWithGemini(params: {
     );
   }
 
-  const modelId = process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
+  const modelId = process.env.GEMINI_MODEL?.trim() || "gemini-3.6-flash";
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
     model: modelId,
