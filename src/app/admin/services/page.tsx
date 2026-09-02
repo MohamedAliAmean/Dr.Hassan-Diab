@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { PageEditorHeader } from "@/components/admin/PageEditorHeader";
 import { slugify, formatPrice } from "@/lib/utils";
 import type { Service } from "@/types/database";
 import { Plus, Pencil } from "lucide-react";
@@ -66,11 +67,13 @@ export default function AdminServicesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Services & Packages</h1>
-          <p className="text-muted">Manage training packages and pricing.</p>
-        </div>
+      <PageEditorHeader
+        title="Services Page"
+        publicPath="/services"
+        description="Manage packages and prices shown on /services."
+      />
+
+      <div className="mb-4 flex justify-end">
         <Button onClick={startNew}>
           <Plus className="mr-1 h-4 w-4" /> Add Package
         </Button>

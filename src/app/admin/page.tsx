@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
-import { Users, UserPlus, CalendarCheck, MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Users, UserPlus, CalendarCheck, MessageSquare, LayoutGrid } from "lucide-react";
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -27,19 +29,37 @@ export default async function AdminDashboard() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Dashboard</h1>
-      <p className="text-muted">Welcome back, Hassan.</p>
+      <p className="text-muted">Welcome back. Manage website pages from Website Pages in the sidebar.</p>
+
+      <Card className="mt-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle>Edit Website Pages</CardTitle>
+            <CardDescription>
+              Home, About, Blog, Exercises, Services, Results, Contact — each page has its own editor with images/videos.
+            </CardDescription>
+          </div>
+          <Link href="/admin/pages">
+            <Button>
+              <LayoutGrid className="mr-2 h-4 w-4" /> Open All Pages
+            </Button>
+          </Link>
+        </div>
+      </Card>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.label}>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardDescription>{stat.label}</CardDescription>
-                <CardTitle className="text-3xl">{stat.value}</CardTitle>
+          <Link key={stat.label} href={stat.href}>
+            <Card className="transition-shadow hover:shadow-md">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardDescription>{stat.label}</CardDescription>
+                  <CardTitle className="text-3xl">{stat.value}</CardTitle>
+                </div>
+                <stat.icon className="h-8 w-8 text-primary/50" />
               </div>
-              <stat.icon className="h-8 w-8 text-primary/50" />
-            </div>
-          </Card>
+            </Card>
+          </Link>
         ))}
       </div>
     </div>

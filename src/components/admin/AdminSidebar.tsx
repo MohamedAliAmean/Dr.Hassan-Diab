@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
+  LayoutGrid,
+  Home,
+  UserRound,
   Users,
   Calendar,
   Dumbbell,
@@ -16,18 +19,21 @@ import {
   Package,
   Image,
   Settings,
+  Phone,
   LogOut,
   Menu,
   X,
 } from "lucide-react";
 import { useState } from "react";
-import { ADMIN_NAV } from "@/lib/constants";
+import { ADMIN_NAV_GROUPS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 
 const iconMap = {
   LayoutDashboard,
+  LayoutGrid,
+  Home,
+  UserRound,
   Users,
   Calendar,
   Dumbbell,
@@ -40,6 +46,7 @@ const iconMap = {
   Package,
   Image,
   Settings,
+  Phone,
 };
 
 export function AdminSidebar() {
@@ -56,37 +63,49 @@ export function AdminSidebar() {
 
   const navContent = (
     <>
-      <div className="mb-8 px-4">
+      <div className="mb-6 px-4">
         <Link href="/admin" className="text-lg font-bold text-primary">
           Admin Panel
         </Link>
-        <p className="text-xs text-muted">Hassan Diab Fitness</p>
+        <p className="text-xs text-muted">Edit each website page separately</p>
       </div>
 
-      <nav className="flex-1 space-y-1 px-2">
-        {ADMIN_NAV.map((item) => {
-          const Icon = iconMap[item.icon as keyof typeof iconMap];
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/admin" && pathname.startsWith(item.href));
+      <nav className="flex-1 space-y-5 overflow-y-auto px-2 pb-4">
+        {ADMIN_NAV_GROUPS.map((group) => (
+          <div key={group.title}>
+            <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wide text-muted">
+              {group.title}
+            </p>
+            <div className="space-y-1">
+              {group.items.map((item) => {
+                const Icon = iconMap[item.icon as keyof typeof iconMap];
+                const isActive =
+                  pathname === item.href ||
+                  (item.href !== "/admin" &&
+                    item.href !== "/admin/pages" &&
+                    pathname.startsWith(item.href)) ||
+                  (item.href === "/admin/pages" && pathname === "/admin/pages");
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setOpen(false)}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                isActive
-                  ? "bg-primary text-white"
-                  : "text-muted hover:bg-card hover:text-foreground"
-              )}
-            >
-              <Icon size={18} />
-              {item.label}
-            </Link>
-          );
-        })}
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                      isActive
+                        ? "bg-primary text-white"
+                        : "text-muted hover:bg-card hover:text-foreground"
+                    )}
+                  >
+                    <Icon size={18} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       <div className="border-t border-border p-4">

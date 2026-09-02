@@ -40,20 +40,101 @@ export const STORAGE_BUCKETS = {
   general: "general",
 } as const;
 
-export const ADMIN_NAV = [
-  { href: "/admin", label: "Dashboard", icon: "LayoutDashboard" },
-  { href: "/admin/clients", label: "Clients", icon: "Users" },
-  { href: "/admin/programs", label: "Programs", icon: "Calendar" },
-  { href: "/admin/exercises", label: "Exercises", icon: "Dumbbell" },
-  { href: "/admin/transformations", label: "Transformations", icon: "TrendingUp" },
-  { href: "/admin/challenges", label: "Challenges", icon: "Trophy" },
-  { href: "/admin/leads", label: "Leads", icon: "UserPlus" },
-  { href: "/admin/bookings", label: "Bookings", icon: "CalendarCheck" },
-  { href: "/admin/messages", label: "Messages", icon: "MessageSquare" },
-  { href: "/admin/blog", label: "Blog", icon: "FileText" },
-  { href: "/admin/services", label: "Services", icon: "Package" },
-  { href: "/admin/media", label: "Media", icon: "Image" },
-  { href: "/admin/settings", label: "Settings", icon: "Settings" },
+export const ADMIN_NAV_GROUPS = [
+  {
+    title: "Overview",
+    items: [{ href: "/admin", label: "Dashboard", icon: "LayoutDashboard" }],
+  },
+  {
+    title: "Website Pages",
+    items: [
+      { href: "/admin/pages", label: "All Pages", icon: "LayoutGrid" },
+      { href: "/admin/pages/home", label: "Home", icon: "Home" },
+      { href: "/admin/pages/about", label: "About", icon: "UserRound" },
+      { href: "/admin/services", label: "Services", icon: "Package" },
+      { href: "/admin/transformations", label: "Results", icon: "TrendingUp" },
+      { href: "/admin/exercises", label: "Exercises", icon: "Dumbbell" },
+      { href: "/admin/blog", label: "Blog", icon: "FileText" },
+      { href: "/admin/challenges", label: "Challenges", icon: "Trophy" },
+      { href: "/admin/pages/contact", label: "Contact", icon: "Phone" },
+    ],
+  },
+  {
+    title: "Business",
+    items: [
+      { href: "/admin/leads", label: "Leads", icon: "UserPlus" },
+      { href: "/admin/bookings", label: "Bookings", icon: "CalendarCheck" },
+      { href: "/admin/clients", label: "Clients", icon: "Users" },
+      { href: "/admin/programs", label: "Programs", icon: "Calendar" },
+      { href: "/admin/messages", label: "Messages", icon: "MessageSquare" },
+    ],
+  },
+  {
+    title: "Library",
+    items: [
+      { href: "/admin/media", label: "Media Library", icon: "Image" },
+      { href: "/admin/settings", label: "General Settings", icon: "Settings" },
+    ],
+  },
+] as const;
+
+export const ADMIN_PAGES_MAP = [
+  {
+    title: "Home",
+    path: "/",
+    adminHref: "/admin/pages/home",
+    description: "Hero title, subtitle, and homepage background image",
+    media: "Hero image",
+  },
+  {
+    title: "About",
+    path: "/about",
+    adminHref: "/admin/pages/about",
+    description: "Trainer story, tagline, and profile photo",
+    media: "Trainer photo",
+  },
+  {
+    title: "Services",
+    path: "/services",
+    adminHref: "/admin/services",
+    description: "Packages, prices, and features",
+    media: "Optional package images",
+  },
+  {
+    title: "Results",
+    path: "/transformations",
+    adminHref: "/admin/transformations",
+    description: "Before/after stories and timelines",
+    media: "Before & after photos",
+  },
+  {
+    title: "Exercises",
+    path: "/exercises",
+    adminHref: "/admin/exercises",
+    description: "Exercise library with demos",
+    media: "Exercise videos & thumbnails",
+  },
+  {
+    title: "Blog",
+    path: "/blog",
+    adminHref: "/admin/blog",
+    description: "Articles, tips, cover images and videos",
+    media: "Cover image + featured video per post",
+  },
+  {
+    title: "Challenges",
+    path: "/challenges",
+    adminHref: "/admin/challenges",
+    description: "Monthly challenges",
+    media: "Challenge image",
+  },
+  {
+    title: "Contact",
+    path: "/contact",
+    adminHref: "/admin/pages/contact",
+    description: "Email, phone, WhatsApp, and address",
+    media: "—",
+  },
 ] as const;
 
 export const PORTAL_NAV = [

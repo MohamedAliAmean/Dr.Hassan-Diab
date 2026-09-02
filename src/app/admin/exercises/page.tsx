@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/Select";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { MediaUpload } from "@/components/admin/MediaUpload";
+import { PageEditorHeader } from "@/components/admin/PageEditorHeader";
 import { MUSCLE_GROUPS, STORAGE_BUCKETS } from "@/lib/constants";
 import { slugify } from "@/lib/utils";
 import type { Exercise } from "@/types/database";
@@ -73,11 +74,13 @@ export default function AdminExercisesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Exercises</h1>
-          <p className="text-muted">Manage your exercise library with videos and instructions.</p>
-        </div>
+      <PageEditorHeader
+        title="Exercises Page"
+        publicPath="/exercises"
+        description="Manage exercises for /exercises. Upload a demo video and thumbnail for each exercise."
+      />
+
+      <div className="mb-4 flex justify-end">
         <Button onClick={startNew}>
           <Plus className="mr-1 h-4 w-4" /> Add Exercise
         </Button>

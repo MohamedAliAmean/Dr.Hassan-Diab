@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { MediaUpload } from "@/components/admin/MediaUpload";
+import { PageEditorHeader } from "@/components/admin/PageEditorHeader";
 import { STORAGE_BUCKETS } from "@/lib/constants";
 import { slugify } from "@/lib/utils";
 import type { Transformation } from "@/types/database";
@@ -45,11 +46,13 @@ export default function AdminTransformationsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Transformations</h1>
-          <p className="text-muted">Manage client success stories with before/after photos.</p>
-        </div>
+      <PageEditorHeader
+        title="Results Page"
+        publicPath="/transformations"
+        description="Manage before/after stories for /transformations. Upload photos for each story."
+      />
+
+      <div className="mb-4 flex justify-end">
         <Button onClick={() => setEditing({ client_name: "", title: "", is_published: false, sort_order: items.length })}>
           <Plus className="mr-1 h-4 w-4" /> Add Story
         </Button>

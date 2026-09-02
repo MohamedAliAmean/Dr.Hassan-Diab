@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { MediaUpload } from "@/components/admin/MediaUpload";
+import { PageEditorHeader } from "@/components/admin/PageEditorHeader";
 import { STORAGE_BUCKETS } from "@/lib/constants";
 import { slugify } from "@/lib/utils";
 import type { BlogPost } from "@/types/database";
@@ -62,13 +63,13 @@ export default function AdminBlogPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Blog</h1>
-          <p className="text-muted">
-            Write posts and attach a cover image or video to each article.
-          </p>
-        </div>
+      <PageEditorHeader
+        title="Blog Page"
+        publicPath="/blog"
+        description="Add posts for /blog. Each post can have its own cover image and featured video."
+      />
+
+      <div className="mb-4 flex justify-end">
         <Button
           onClick={() =>
             setEditing({

@@ -1,3 +1,4 @@
+import { PageEditorHeader } from "@/components/admin/PageEditorHeader";
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/Badge";
 
@@ -10,8 +11,11 @@ export default async function AdminChallengesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Challenges</h1>
-      <p className="text-muted">Monthly community challenges for clients.</p>
+      <PageEditorHeader
+        title="Challenges Page"
+        publicPath="/challenges"
+        description="Manage monthly challenges shown on /challenges."
+      />
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {challenges?.map((challenge) => (
@@ -26,7 +30,7 @@ export default async function AdminChallengesPage() {
           </div>
         ))}
         {(!challenges || challenges.length === 0) && (
-          <p className="text-muted">No challenges yet. Challenge management coming in Phase 2.</p>
+          <p className="text-muted">No challenges yet. Challenge builder coming next.</p>
         )}
       </div>
     </div>
