@@ -6,6 +6,6 @@ export type ChatMessage = {
 export type AiProviderName = "cursor" | "gemini";
 
 export function getAiProviderName(): AiProviderName {
-  const raw = (process.env.AI_PROVIDER || "cursor").toLowerCase();
-  return raw === "gemini" ? "gemini" : "cursor";
+  const raw = (process.env.AI_PROVIDER || "gemini").toLowerCase();
+  return raw === "cursor" ? "cursor" : "gemini";
 }

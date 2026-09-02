@@ -4,13 +4,18 @@ import { join } from "path";
 import type { ChatMessage } from "@/lib/ai/types";
 
 /**
- * Temporary Cursor-backed Q&A using a local disposable workspace.
- * Not ideal for production traffic — switch AI_PROVIDER=gemini when ready.
+ * Local-only Cursor experiments. Does not work on Vercel serverless.
  */
 export async function askWithCursor(params: {
   systemPrompt: string;
   messages: ChatMessage[];
 }): Promise<string> {
+  if (process.env.VERCEL) {
+    throw new Error(
+      "Cursor provider is blocked on Vercel. Use AI_PROVIDER=gemini with GEMINI_API_KEY."
+    );
+  }
+
   const apiKey = process.env.CURSOR_API_KEY?.trim();
   if (!apiKey) {
     throw new Error(
@@ -47,8 +52,7 @@ ${history}
 Visitor question:
 ${latestUser}`;
 
-    // Dynamic import keeps Turbopack from bundling SDK license assets.
-    const { Agent, CursorAgentError } = await import("@cursor/sdk");
+    const { Agent } = await import("@cursor/sdk");
 
     const result = await Agent.prompt(prompt, {
       apiKey,
@@ -57,7 +61,7 @@ ${latestUser}`;
     });
 
     if (result.status === "error") {
-      throw new Error("Cursor agent run failed. Try again or switch to Gemini.");
+      throw new Error("Cursor agent run failed. Switch to Gemini for production.");
     }
 
     const text = (result.result || "").trim();
@@ -66,12 +70,8 @@ ${latestUser}`;
     }
     return text;
   } catch (err) {
-    const name = err && typeof err === "object" ? (err as { name?: string }).name : "";
     const message = err instanceof Error ? err.message : "Cursor request failed";
-    if (name === "CursorAgentError" || message.toLowerCase().includes("cursor")) {
-      throw new Error(`Cursor error: ${message}`);
-    }
-    throw err;
+    throw new Error(`Cursor error: ${message}`);
   } finally {
     await rm(workspace, { recursive: true, force: true }).catch(() => undefined);
   }
