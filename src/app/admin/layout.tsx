@@ -1,5 +1,7 @@
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 
+export const dynamic = "force-dynamic";
+
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
   return (
     <div className="min-h-screen bg-background">

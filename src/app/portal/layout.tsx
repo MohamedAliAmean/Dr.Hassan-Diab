@@ -1,5 +1,7 @@
 import { PortalSidebar } from "@/components/portal/PortalSidebar";
 
+export const dynamic = "force-dynamic";
+
 export default function PortalLayout({ children }: LayoutProps<"/portal">) {
   return (
     <div className="min-h-screen bg-background">

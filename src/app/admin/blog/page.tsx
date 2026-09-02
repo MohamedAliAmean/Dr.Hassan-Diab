@@ -15,9 +15,8 @@ export default function AdminBlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [editing, setEditing] = useState<Partial<BlogPost> | null>(null);
   const [saving, setSaving] = useState(false);
-  const supabase = createClient();
-
   async function load() {
+    const supabase = createClient();
     const { data } = await supabase.from("blog_posts").select("*").order("created_at", { ascending: false });
     setPosts(data || []);
   }
@@ -27,6 +26,7 @@ export default function AdminBlogPage() {
   async function handleSave() {
     if (!editing?.title) return;
     setSaving(true);
+    const supabase = createClient();
     const payload = {
       ...editing,
       slug: editing.slug || slugify(editing.title),

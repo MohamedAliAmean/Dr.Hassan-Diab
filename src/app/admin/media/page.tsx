@@ -8,10 +8,10 @@ import { format } from "date-fns";
 
 export default function AdminMediaPage() {
   const [media, setMedia] = useState<Media[]>([]);
-  const supabase = createClient();
 
   useEffect(() => {
     async function load() {
+      const supabase = createClient();
       const { data } = await supabase
         .from("media")
         .select("*")

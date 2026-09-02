@@ -19,9 +19,8 @@ export default function AdminExercisesPage() {
   const [editing, setEditing] = useState<Partial<Exercise> | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const supabase = createClient();
-
   async function loadExercises() {
+    const supabase = createClient();
     const { data } = await supabase.from("exercises").select("*").order("name");
     setExercises(data || []);
   }
@@ -48,6 +47,7 @@ export default function AdminExercisesPage() {
   async function handleSave() {
     if (!editing?.name) return;
     setSaving(true);
+    const supabase = createClient();
 
     const payload = {
       ...editing,

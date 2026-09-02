@@ -26,10 +26,9 @@ const SETTING_FIELDS = [
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
-  const supabase = createClient();
-
   useEffect(() => {
     async function load() {
+      const supabase = createClient();
       const { data } = await supabase.from("site_settings").select("*");
       const map: Record<string, string> = {};
       data?.forEach((s: SiteSetting) => {
@@ -42,6 +41,7 @@ export default function AdminSettingsPage() {
 
   async function handleSave() {
     setSaving(true);
+    const supabase = createClient();
     for (const [key, value] of Object.entries(settings)) {
       await supabase
         .from("site_settings")

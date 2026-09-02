@@ -11,10 +11,9 @@ import type { Profile } from "@/types/database";
 export default function PortalProfilePage() {
   const [profile, setProfile] = useState<Partial<Profile>>({});
   const [saving, setSaving] = useState(false);
-  const supabase = createClient();
-
   useEffect(() => {
     async function load() {
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
@@ -26,6 +25,7 @@ export default function PortalProfilePage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       await supabase.from("profiles").update({

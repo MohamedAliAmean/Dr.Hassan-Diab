@@ -15,9 +15,8 @@ export default function AdminServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [editing, setEditing] = useState<Partial<Service> | null>(null);
   const [saving, setSaving] = useState(false);
-  const supabase = createClient();
-
   async function loadServices() {
+    const supabase = createClient();
     const { data } = await supabase.from("services").select("*").order("sort_order");
     setServices(data || []);
   }
@@ -44,6 +43,7 @@ export default function AdminServicesPage() {
   async function handleSave() {
     if (!editing?.name) return;
     setSaving(true);
+    const supabase = createClient();
 
     const payload = {
       ...editing,

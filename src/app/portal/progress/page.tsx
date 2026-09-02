@@ -12,9 +12,8 @@ export default function PortalProgressPage() {
   const [entries, setEntries] = useState<ProgressEntry[]>([]);
   const [weight, setWeight] = useState("");
   const [saving, setSaving] = useState(false);
-  const supabase = createClient();
-
   async function load() {
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     const { data } = await supabase
@@ -30,6 +29,7 @@ export default function PortalProgressPage() {
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user && weight) {
       await supabase.from("progress_entries").insert({

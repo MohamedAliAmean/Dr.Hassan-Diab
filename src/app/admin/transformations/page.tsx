@@ -17,9 +17,8 @@ export default function AdminTransformationsPage() {
   const [items, setItems] = useState<Transformation[]>([]);
   const [editing, setEditing] = useState<Partial<Transformation> | null>(null);
   const [saving, setSaving] = useState(false);
-  const supabase = createClient();
-
   async function load() {
+    const supabase = createClient();
     const { data } = await supabase.from("transformations").select("*").order("sort_order");
     setItems(data || []);
   }
@@ -29,6 +28,7 @@ export default function AdminTransformationsPage() {
   async function handleSave() {
     if (!editing?.title || !editing?.client_name) return;
     setSaving(true);
+    const supabase = createClient();
     const payload = {
       ...editing,
       slug: editing.slug || slugify(editing.title),
