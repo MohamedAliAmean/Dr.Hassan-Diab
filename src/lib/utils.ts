@@ -6,12 +6,31 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
+  const normalized = text.normalize("NFKC").trim().toLowerCase();
+
+  // Prefer ASCII-only slugs — Unicode paths (Arabic) break in some Next.js route matches
+  const ascii = normalized
+    .replace(/[^\x00-\x7F]/g, " ")
+    .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+
+  if (ascii) return ascii;
+
+  // Arabic / non-Latin titles: stable short hash (URL-safe)
+  let hash = 0;
+  for (let i = 0; i < normalized.length; i++) {
+    hash = (Math.imul(31, hash) + normalized.charCodeAt(i)) >>> 0;
+  }
+  return `post-${hash.toString(36)}`;
+}
+
+/** Safely decode a dynamic route param (handles Arabic / percent-encoding). */
+export function decodeParam(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 }
 
 export function formatPrice(price: number, currency = "EGP"): string {

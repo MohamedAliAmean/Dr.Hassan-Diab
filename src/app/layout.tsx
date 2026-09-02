@@ -10,10 +10,10 @@ export const metadata: Metadata = {
     "Personal training coaching built around your body, schedule, and goals. Sustainable strength and real results.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
-      <body className="min-h-full flex flex-col antialiased" suppressHydrationWarning>
+      <body className="flex min-h-full flex-col antialiased" suppressHydrationWarning>
         {children}
       </body>
     </html>

@@ -1,29 +1,32 @@
-import Link from "next/link";
 import { ArrowRight, Target, Users, Award } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { LocaleLink } from "@/components/i18n/LocaleLink";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import type { Dictionary } from "@/lib/i18n";
 
 interface HeroProps {
   title?: string;
   subtitle?: string;
   imageUrl?: string | null;
+  t: Dictionary;
 }
 
-export function Hero({
-  title = "Train Smarter.\nLive Stronger.",
-  subtitle = "Personal coaching built around your body, your schedule, and your goals. No gimmicks — just sustainable strength and real results.",
-  imageUrl,
-}: HeroProps) {
-  const [line1, line2] = title.split("\n");
+export function Hero({ title, subtitle, imageUrl, t }: HeroProps) {
+  const resolvedTitle = title || t.home.defaultTitle;
+  const resolvedSubtitle = subtitle || t.home.defaultSubtitle;
+  const [line1, line2] = resolvedTitle.split("\n");
 
   return (
     <section className="relative overflow-hidden bg-primary text-white">
       {imageUrl && (
         <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <OptimizedImage
             src={imageUrl}
             alt=""
-            className="absolute inset-0 h-full w-full object-cover"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-primary/75" />
         </>
@@ -31,7 +34,7 @@ export function Hero({
       <div className="relative mx-auto max-w-6xl px-4 py-24 md:py-32">
         <div className="max-w-2xl">
           <p className="mb-4 text-sm font-medium uppercase tracking-wider text-secondary">
-            Personal Training Coach
+            {t.home.eyebrow}
           </p>
           <h1 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
             {line1}
@@ -42,22 +45,22 @@ export function Hero({
               </>
             )}
           </h1>
-          <p className="mt-6 text-lg text-white/80">{subtitle}</p>
+          <p className="mt-6 text-lg text-white/80">{resolvedSubtitle}</p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <Link href="/start">
+            <LocaleLink href="/start">
               <Button variant="secondary" size="lg">
-                Find Your Path <ArrowRight className="ml-2 h-4 w-4" />
+                {t.nav.findPath} <ArrowRight className="ms-2 h-4 w-4" />
               </Button>
-            </Link>
-            <Link href="/book">
+            </LocaleLink>
+            <LocaleLink href="/book">
               <Button
                 variant="outline"
                 size="lg"
                 className="border-white/30 text-white hover:bg-white/10"
               >
-                Book Free Assessment
+                {t.nav.bookAssessment}
               </Button>
-            </Link>
+            </LocaleLink>
           </div>
         </div>
 
@@ -66,21 +69,21 @@ export function Hero({
             <Target className="h-8 w-8 text-secondary" />
             <div>
               <p className="text-2xl font-bold">100+</p>
-              <p className="text-sm text-white/70">Clients Transformed</p>
+              <p className="text-sm text-white/70">{t.home.statClients}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Users className="h-8 w-8 text-secondary" />
             <div>
               <p className="text-2xl font-bold">5+</p>
-              <p className="text-sm text-white/70">Years Experience</p>
+              <p className="text-sm text-white/70">{t.home.statYears}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Award className="h-8 w-8 text-secondary" />
             <div>
-              <p className="text-2xl font-bold">Certified</p>
-              <p className="text-sm text-white/70">Personal Trainer</p>
+              <p className="text-2xl font-bold">{t.home.certified}</p>
+              <p className="text-sm text-white/70">{t.home.statCertified}</p>
             </div>
           </div>
         </div>

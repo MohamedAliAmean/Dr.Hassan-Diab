@@ -3,8 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Users, UserPlus, CalendarCheck, MessageSquare, LayoutGrid } from "lucide-react";
+import { getDictionary, getRequestLocale } from "@/lib/i18n";
 
 export default async function AdminDashboard() {
+  const locale = await getRequestLocale();
+  const t = getDictionary(locale);
   const supabase = await createClient();
 
   const [
@@ -20,28 +23,46 @@ export default async function AdminDashboard() {
   ]);
 
   const stats = [
-    { label: "Active Clients", value: clientsCount ?? 0, icon: Users, href: "/admin/clients" },
-    { label: "New Leads", value: leadsCount ?? 0, icon: UserPlus, href: "/admin/leads" },
-    { label: "Pending Bookings", value: bookingsCount ?? 0, icon: CalendarCheck, href: "/admin/bookings" },
-    { label: "Unread Messages", value: messagesCount ?? 0, icon: MessageSquare, href: "/admin/messages" },
+    {
+      label: t.admin.dashboard.activeClients,
+      value: clientsCount ?? 0,
+      icon: Users,
+      href: "/admin/clients",
+    },
+    {
+      label: t.admin.dashboard.newLeads,
+      value: leadsCount ?? 0,
+      icon: UserPlus,
+      href: "/admin/leads",
+    },
+    {
+      label: t.admin.dashboard.pendingBookings,
+      value: bookingsCount ?? 0,
+      icon: CalendarCheck,
+      href: "/admin/bookings",
+    },
+    {
+      label: t.admin.dashboard.unreadMessages,
+      value: messagesCount ?? 0,
+      icon: MessageSquare,
+      href: "/admin/messages",
+    },
   ];
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Dashboard</h1>
-      <p className="text-muted">Welcome back. Manage website pages from Website Pages in the sidebar.</p>
+      <h1 className="text-2xl font-bold">{t.admin.dashboard.title}</h1>
+      <p className="text-muted">{t.admin.dashboard.welcome}</p>
 
       <Card className="mt-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle>Edit Website Pages</CardTitle>
-            <CardDescription>
-              Home, About, Blog, Exercises, Services, Results, Contact — each page has its own editor with images/videos.
-            </CardDescription>
+            <CardTitle>{t.admin.dashboard.editPagesTitle}</CardTitle>
+            <CardDescription>{t.admin.dashboard.editPagesBody}</CardDescription>
           </div>
           <Link href="/admin/pages">
             <Button>
-              <LayoutGrid className="mr-2 h-4 w-4" /> Open All Pages
+              <LayoutGrid className="me-2 h-4 w-4" /> {t.admin.dashboard.openAllPages}
             </Button>
           </Link>
         </div>
@@ -49,7 +70,7 @@ export default async function AdminDashboard() {
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Link key={stat.label} href={stat.href}>
+          <Link key={stat.href} href={stat.href}>
             <Card className="transition-shadow hover:shadow-md">
               <div className="flex items-center justify-between">
                 <div>

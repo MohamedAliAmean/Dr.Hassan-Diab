@@ -36,6 +36,7 @@ export function PortalSidebar() {
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
+    document.cookie = "hd_role=;path=/;max-age=0";
     router.push("/login");
     router.refresh();
   }

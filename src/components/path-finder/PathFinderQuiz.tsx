@@ -7,20 +7,15 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { Card } from "@/components/ui/Card";
+import { LocaleLink } from "@/components/i18n/LocaleLink";
 import { FITNESS_GOALS, EXPERIENCE_LEVELS, SCHEDULE_OPTIONS } from "@/lib/constants";
 import type { ExperienceLevel, FitnessGoal } from "@/types/database";
+import type { Dictionary, Locale } from "@/lib/i18n";
 
 const STEPS = ["goal", "experience", "schedule", "health", "contact", "result"] as const;
 type Step = (typeof STEPS)[number];
 
-const GOAL_RECOMMENDATIONS: Record<FitnessGoal, string> = {
-  weight_loss: "Fat Loss Program",
-  muscle_gain: "Hypertrophy Program",
-  performance: "Athletic Performance Program",
-  rehab: "Rehab & Recovery Program",
-};
-
-export function PathFinderQuiz() {
+export function PathFinderQuiz({ locale, t }: { locale: Locale; t: Dictionary }) {
   const [step, setStep] = useState<Step>("goal");
   const [goal, setGoal] = useState<FitnessGoal | "">("");
   const [experience, setExperience] = useState<ExperienceLevel | "">("");
@@ -34,6 +29,9 @@ export function PathFinderQuiz() {
 
   const stepIndex = STEPS.indexOf(step);
   const progress = ((stepIndex + 1) / STEPS.length) * 100;
+  const recommendation = goal
+    ? t.quiz.recommendations[goal]
+    : t.quiz.recommendations.custom;
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -49,7 +47,7 @@ export function PathFinderQuiz() {
           experience,
           schedule,
           injuries,
-          quiz_answers: { goal, experience, schedule, injuries },
+          quiz_answers: { goal, experience, schedule, injuries, locale },
         }),
       });
       if (res.ok) setSubmitted(true);
@@ -72,15 +70,14 @@ export function PathFinderQuiz() {
     return (
       <Card className="mx-auto max-w-lg text-center">
         <CheckCircle className="mx-auto h-16 w-16 text-primary" />
-        <h2 className="mt-4 text-2xl font-bold">Your Path is Ready!</h2>
+        <h2 className="mt-4 text-2xl font-bold">{t.quiz.readyTitle}</h2>
         <p className="mt-2 text-muted">
-          Based on your answers, we recommend the{" "}
-          <strong>{goal ? GOAL_RECOMMENDATIONS[goal] : "best program for you"}</strong>.
-          Hassan will reach out within 24 hours.
+          {t.quiz.readyBodyPrefix} <strong>{recommendation}</strong>.{" "}
+          {t.quiz.readyBodySuffix}
         </p>
-        <a href="/book" className="mt-6 inline-block">
-          <Button>Book Your Free Assessment</Button>
-        </a>
+        <LocaleLink href="/book" className="mt-6 inline-block">
+          <Button>{t.quiz.bookCta}</Button>
+        </LocaleLink>
       </Card>
     );
   }
@@ -97,20 +94,22 @@ export function PathFinderQuiz() {
       <Card>
         {step === "goal" && (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold">What&apos;s your primary goal?</h2>
+            <h2 className="text-xl font-bold">{t.quiz.goalTitle}</h2>
             <div className="grid gap-3">
               {FITNESS_GOALS.map((g) => (
                 <button
                   key={g.value}
                   onClick={() => setGoal(g.value)}
-                  className={`rounded-lg border p-4 text-left transition-colors ${
+                  className={`rounded-lg border p-4 text-start transition-colors ${
                     goal === g.value
                       ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/50"
                   }`}
                 >
-                  <p className="font-medium">{g.label}</p>
-                  <p className="text-sm text-muted">{g.description}</p>
+                  <p className="font-medium">{t.quiz.goals[g.value].label}</p>
+                  <p className="text-sm text-muted">
+                    {t.quiz.goals[g.value].description}
+                  </p>
                 </button>
               ))}
             </div>
@@ -119,19 +118,19 @@ export function PathFinderQuiz() {
 
         {step === "experience" && (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold">What&apos;s your training experience?</h2>
+            <h2 className="text-xl font-bold">{t.quiz.experienceTitle}</h2>
             <div className="space-y-3">
               {EXPERIENCE_LEVELS.map((e) => (
                 <button
                   key={e.value}
                   onClick={() => setExperience(e.value)}
-                  className={`w-full rounded-lg border p-4 text-left transition-colors ${
+                  className={`w-full rounded-lg border p-4 text-start transition-colors ${
                     experience === e.value
                       ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/50"
                   }`}
                 >
-                  {e.label}
+                  {t.quiz.experience[e.value]}
                 </button>
               ))}
             </div>
@@ -140,12 +139,12 @@ export function PathFinderQuiz() {
 
         {step === "schedule" && (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold">How often can you train?</h2>
+            <h2 className="text-xl font-bold">{t.quiz.scheduleTitle}</h2>
             <Select value={schedule} onChange={(e) => setSchedule(e.target.value)}>
-              <option value="">Select schedule...</option>
+              <option value="">{t.quiz.selectSchedule}</option>
               {SCHEDULE_OPTIONS.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {t.quiz.schedule[s as keyof typeof t.quiz.schedule]}
                 </option>
               ))}
             </Select>
@@ -154,9 +153,9 @@ export function PathFinderQuiz() {
 
         {step === "health" && (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold">Any injuries or health concerns?</h2>
+            <h2 className="text-xl font-bold">{t.quiz.healthTitle}</h2>
             <Textarea
-              placeholder="Tell us about any injuries, limitations, or health conditions..."
+              placeholder={t.quiz.healthPlaceholder}
               value={injuries}
               onChange={(e) => setInjuries(e.target.value)}
             />
@@ -165,23 +164,23 @@ export function PathFinderQuiz() {
 
         {step === "contact" && (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold">Almost done! Your details:</h2>
+            <h2 className="text-xl font-bold">{t.quiz.contactTitle}</h2>
             <Input
-              placeholder="Full name"
+              placeholder={t.quiz.fullName}
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
             />
             <Input
               type="email"
-              placeholder="Email"
+              placeholder={t.quiz.email}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
             <Input
               type="tel"
-              placeholder="Phone (optional)"
+              placeholder={t.quiz.phone}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
@@ -190,25 +189,18 @@ export function PathFinderQuiz() {
 
         {step === "result" && (
           <div className="space-y-4 text-center">
-            <h2 className="text-xl font-bold">Your Recommended Path</h2>
+            <h2 className="text-xl font-bold">{t.quiz.resultTitle}</h2>
             <div className="rounded-lg bg-primary/5 p-6">
-              <p className="text-2xl font-bold text-primary">
-                {goal ? GOAL_RECOMMENDATIONS[goal] : "Custom Program"}
-              </p>
-              <p className="mt-2 text-sm text-muted">
-                Tailored for {experience || "your"} level, {schedule || "your schedule"}
-              </p>
+              <p className="text-2xl font-bold text-primary">{recommendation}</p>
             </div>
-            <p className="text-sm text-muted">
-              Submit to get your personalized plan and hear from Hassan within 24 hours.
-            </p>
+            <p className="text-sm text-muted">{t.quiz.resultBody}</p>
           </div>
         )}
 
         <div className="mt-6 flex justify-between">
           {stepIndex > 0 && step !== "result" ? (
             <Button variant="ghost" onClick={back}>
-              <ArrowLeft className="mr-1 h-4 w-4" /> Back
+              <ArrowLeft className="me-1 h-4 w-4" /> {t.quiz.back}
             </Button>
           ) : (
             <div />
@@ -216,7 +208,7 @@ export function PathFinderQuiz() {
 
           {step === "result" ? (
             <Button onClick={handleSubmit} disabled={submitting}>
-              {submitting ? "Submitting..." : "Get My Plan"}
+              {submitting ? t.quiz.submitting : t.quiz.submit}
             </Button>
           ) : (
             <Button
@@ -228,7 +220,7 @@ export function PathFinderQuiz() {
                 (step === "contact" && (!fullName || !email))
               }
             >
-              Next <ArrowRight className="ml-1 h-4 w-4" />
+              {t.quiz.next} <ArrowRight className="ms-1 h-4 w-4" />
             </Button>
           )}
         </div>

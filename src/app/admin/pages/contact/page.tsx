@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Card, CardTitle } from "@/components/ui/Card";
 import type { SiteSetting } from "@/types/database";
+import { useAdminLocale } from "@/components/i18n/AdminLocaleProvider";
 
 export default function AdminContactPageEditor() {
+  const { t } = useAdminLocale();
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export default function AdminContactPageEditor() {
           updated_at: new Date().toISOString(),
         });
       }
-      setMessage("Contact page saved. Open /contact to see it.");
+      setMessage("Contact page saved.");
     } finally {
       setSaving(false);
     }
@@ -49,9 +51,9 @@ export default function AdminContactPageEditor() {
   return (
     <div>
       <PageEditorHeader
-        title="Contact Page"
+        title={t.admin.pages.contact}
         publicPath="/contact"
-        description="Edit email, phone, WhatsApp, address, and social links shown on Contact."
+        description={t.admin.pages.contactDesc}
       />
 
       {message && (
@@ -61,7 +63,7 @@ export default function AdminContactPageEditor() {
       )}
 
       <Card>
-        <CardTitle>Contact Details</CardTitle>
+        <CardTitle>{t.admin.pages.contact}</CardTitle>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div>
             <label className="text-sm font-medium">Email</label>
@@ -114,7 +116,7 @@ export default function AdminContactPageEditor() {
           </div>
         </div>
         <Button className="mt-6" onClick={handleSave} disabled={saving}>
-          {saving ? "Saving..." : "Save Contact Page"}
+          {saving ? t.admin.editor.saving : t.admin.editor.save}
         </Button>
       </Card>
     </div>

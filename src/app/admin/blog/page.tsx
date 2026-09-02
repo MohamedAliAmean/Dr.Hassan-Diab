@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { MediaUpload } from "@/components/admin/MediaUpload";
+import { ImageFocusPicker } from "@/components/admin/ImageFocusPicker";
 import { PageEditorHeader } from "@/components/admin/PageEditorHeader";
 import { STORAGE_BUCKETS } from "@/lib/constants";
 import { slugify } from "@/lib/utils";
@@ -36,13 +37,16 @@ export default function AdminBlogPage() {
     if (!editing?.title) return;
     setSaving(true);
     const supabase = createClient();
+    const slug = (editing.slug || slugify(editing.title)).trim() || slugify(editing.title);
     const payload = {
       title: editing.title,
-      slug: editing.slug || slugify(editing.title),
+      slug,
       excerpt: editing.excerpt || null,
       content: editing.content || null,
       category: editing.category || null,
       cover_image: editing.cover_image || null,
+      cover_focus_x: editing.cover_focus_x ?? 50,
+      cover_focus_y: editing.cover_focus_y ?? 50,
       video_url: editing.video_url || null,
       tags: editing.tags || [],
       is_published: editing.is_published || false,
@@ -78,6 +82,8 @@ export default function AdminBlogPage() {
               tags: [],
               cover_image: null,
               video_url: null,
+              cover_focus_x: 50,
+              cover_focus_y: 35,
             })
           }
         >
@@ -118,8 +124,22 @@ export default function AdminBlogPage() {
                 accept="image/*"
                 label="Cover Image (for this post)"
                 currentUrl={editing.cover_image}
-                onUpload={(url) => setEditing({ ...editing, cover_image: url })}
-                onRemove={() => setEditing({ ...editing, cover_image: null })}
+                onUpload={(url) =>
+                  setEditing({
+                    ...editing,
+                    cover_image: url,
+                    cover_focus_x: editing.cover_focus_x ?? 50,
+                    cover_focus_y: editing.cover_focus_y ?? 35,
+                  })
+                }
+                onRemove={() =>
+                  setEditing({
+                    ...editing,
+                    cover_image: null,
+                    cover_focus_x: 50,
+                    cover_focus_y: 50,
+                  })
+                }
               />
               <MediaUpload
                 bucket={STORAGE_BUCKETS.blog}
@@ -131,6 +151,18 @@ export default function AdminBlogPage() {
                 onRemove={() => setEditing({ ...editing, video_url: null })}
               />
             </div>
+
+            {editing.cover_image && (
+              <ImageFocusPicker
+                src={editing.cover_image}
+                focusX={editing.cover_focus_x}
+                focusY={editing.cover_focus_y}
+                onChange={({ x, y }) =>
+                  setEditing({ ...editing, cover_focus_x: x, cover_focus_y: y })
+                }
+                label="Cover framing for website"
+              />
+            )}
 
             <label className="flex items-center gap-2 text-sm">
               <input

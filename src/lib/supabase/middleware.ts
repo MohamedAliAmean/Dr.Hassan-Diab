@@ -2,11 +2,28 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Profile } from "@/types/database";
 
+const ROLE_COOKIE = "hd_role";
+const ROLE_MAX_AGE = 60 * 60; // 1 hour
+
+function isProtectedPath(pathname: string) {
+  return (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/portal") ||
+    pathname === "/login"
+  );
+}
+
 export async function updateSession(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // Public / API routes: zero network auth calls (critical for fast navigation)
+  if (!isProtectedPath(pathname)) {
+    return NextResponse.next({ request });
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Skip auth checks if env is not configured yet
   if (!url || !key) {
     return NextResponse.next({ request });
   }
@@ -34,8 +51,6 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
-
   if (pathname.startsWith("/admin") || pathname.startsWith("/portal")) {
     if (!user) {
       const redirectUrl = request.nextUrl.clone();
@@ -44,13 +59,26 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
+    let role = request.cookies.get(ROLE_COOKIE)?.value as
+      | Profile["role"]
+      | undefined;
 
-    const role = (profile as Pick<Profile, "role"> | null)?.role;
+    if (role !== "admin" && role !== "client") {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      role = (profile as Pick<Profile, "role"> | null)?.role;
+      if (role === "admin" || role === "client") {
+        supabaseResponse.cookies.set(ROLE_COOKIE, role, {
+          path: "/",
+          maxAge: ROLE_MAX_AGE,
+          sameSite: "lax",
+        });
+      }
+    }
 
     if (pathname.startsWith("/admin") && role !== "admin") {
       const redirectUrl = request.nextUrl.clone();
@@ -60,16 +88,30 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (pathname === "/login" && user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
+    let role = request.cookies.get(ROLE_COOKIE)?.value as
+      | Profile["role"]
+      | undefined;
 
-    const role = (profile as Pick<Profile, "role"> | null)?.role;
+    if (role !== "admin" && role !== "client") {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      role = (profile as Pick<Profile, "role"> | null)?.role;
+    }
+
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = role === "admin" ? "/admin" : "/portal";
-    return NextResponse.redirect(redirectUrl);
+    const response = NextResponse.redirect(redirectUrl);
+    if (role === "admin" || role === "client") {
+      response.cookies.set(ROLE_COOKIE, role, {
+        path: "/",
+        maxAge: ROLE_MAX_AGE,
+        sameSite: "lax",
+      });
+    }
+    return response;
   }
 
   return supabaseResponse;

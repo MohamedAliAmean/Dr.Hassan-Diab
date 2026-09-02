@@ -210,6 +210,8 @@ export interface BlogPost {
   excerpt: string | null;
   content: string | null;
   cover_image: string | null;
+  cover_focus_x?: number | null;
+  cover_focus_y?: number | null;
   video_url: string | null;
   category: string | null;
   tags: string[];

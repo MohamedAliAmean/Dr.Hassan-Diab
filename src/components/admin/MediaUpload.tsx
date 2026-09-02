@@ -5,6 +5,7 @@ import { Upload, X, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { optimizeUploadFile } from "@/lib/media/optimize-upload";
 
 interface MediaUploadProps {
   bucket: string;
@@ -28,6 +29,7 @@ export function MediaUpload({
   className,
 }: MediaUploadProps) {
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -37,15 +39,25 @@ export function MediaUpload({
 
     setUploading(true);
     setError(null);
+    setProgress("Optimizing for web…");
 
     try {
+      const optimized = await optimizeUploadFile(file, (p) => {
+        setProgress(p.message);
+      });
+
+      setProgress("Uploading…");
       const supabase = createClient();
-      const ext = file.name.split(".").pop();
+      const ext = optimized.name.split(".").pop() || "bin";
       const fileName = `${folder ? folder + "/" : ""}${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from(bucket)
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, optimized, {
+          upsert: true,
+          contentType: optimized.type || file.type,
+          cacheControl: "31536000",
+        });
 
       if (uploadError) throw uploadError;
 
@@ -54,16 +66,18 @@ export function MediaUpload({
       } = supabase.storage.from(bucket).getPublicUrl(fileName);
 
       await supabase.from("media").insert({
-        file_name: file.name,
+        file_name: optimized.name,
         file_url: publicUrl,
-        file_type: file.type.startsWith("video") ? "video" : "image",
-        file_size: file.size,
+        file_type: optimized.type.startsWith("video") ? "video" : "image",
+        file_size: optimized.size,
         folder: folder || bucket,
       });
 
       onUpload(publicUrl);
+      setProgress(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
+      setProgress(null);
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -77,18 +91,27 @@ export function MediaUpload({
       {label && <label className="text-sm font-medium">{label}</label>}
 
       {currentUrl ? (
-        <div className="relative rounded-lg border border-border overflow-hidden">
+        <div className="relative overflow-hidden rounded-lg border border-border">
           {isVideo ? (
-            <video src={currentUrl} controls className="w-full max-h-48 object-cover" />
+            <video
+              src={currentUrl}
+              controls
+              preload="metadata"
+              className="max-h-48 w-full object-cover"
+            />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={currentUrl} alt="Upload preview" className="w-full max-h-48 object-cover" />
+            <img
+              src={currentUrl}
+              alt="Upload preview"
+              className="max-h-48 w-full object-cover"
+            />
           )}
           {onRemove && (
             <button
               type="button"
               onClick={onRemove}
-              className="absolute right-2 top-2 rounded-full bg-red-600 p-1 text-white"
+              className="absolute end-2 top-2 rounded-full bg-red-600 p-1 text-white"
             >
               <X size={14} />
             </button>
@@ -96,15 +119,20 @@ export function MediaUpload({
         </div>
       ) : (
         <div
-          onClick={() => inputRef.current?.click()}
+          onClick={() => !uploading && inputRef.current?.click()}
           className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-8 transition-colors hover:border-primary"
         >
           {uploading ? (
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <>
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              {progress && <p className="mt-2 text-sm text-muted">{progress}</p>}
+            </>
           ) : (
             <>
               <Upload className="h-8 w-8 text-muted" />
-              <p className="mt-2 text-sm text-muted">Click to upload image or video</p>
+              <p className="mt-2 text-sm text-muted">
+                Click to upload (images → WebP, videos → WebM)
+              </p>
             </>
           )}
         </div>
@@ -116,6 +144,7 @@ export function MediaUpload({
         accept={accept}
         onChange={handleUpload}
         className="hidden"
+        disabled={uploading}
       />
 
       {currentUrl && (
@@ -126,7 +155,7 @@ export function MediaUpload({
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
         >
-          {uploading ? "Uploading..." : "Replace file"}
+          {uploading ? progress || "Uploading..." : "Replace file"}
         </Button>
       )}
 
