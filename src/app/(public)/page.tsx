@@ -2,12 +2,22 @@ import Link from "next/link";
 import { Hero } from "@/components/home/Hero";
 import { Button } from "@/components/ui/Button";
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
+import { getSiteSettings, setting } from "@/lib/site-settings";
 import { ArrowRight, Dumbbell, Heart, Zap } from "lucide-react";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const settings = await getSiteSettings();
+  const heroTitle = setting(settings, "hero_title", "Train Smarter.\nLive Stronger.");
+  const heroSubtitle = setting(
+    settings,
+    "hero_subtitle",
+    "Personal coaching built around your body, your schedule, and your goals. No gimmicks — just sustainable strength and real results."
+  );
+  const heroImage = setting(settings, "hero_image") || null;
+
   return (
     <>
-      <Hero />
+      <Hero title={heroTitle} subtitle={heroSubtitle} imageUrl={heroImage} />
 
       <section className="mx-auto max-w-6xl px-4 py-20">
         <div className="text-center">

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
@@ -9,6 +10,30 @@ import { Mail, Phone, MapPin } from "lucide-react";
 
 export default function ContactPage() {
   const [sent, setSent] = useState(false);
+  const [settings, setSettings] = useState({
+    email: "",
+    phone: "",
+    whatsapp: "",
+    address: "",
+  });
+
+  useEffect(() => {
+    async function load() {
+      const supabase = createClient();
+      const { data } = await supabase.from("site_settings").select("key, value");
+      const map: Record<string, string> = {};
+      data?.forEach((row) => {
+        map[row.key] = row.value || "";
+      });
+      setSettings({
+        email: map.email || "",
+        phone: map.phone || "",
+        whatsapp: map.whatsapp || "",
+        address: map.address || "",
+      });
+    }
+    load();
+  }, []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,7 +55,9 @@ export default function ContactPage() {
             </div>
             <div>
               <p className="font-medium">Email</p>
-              <p className="text-sm text-muted">Configure in Admin Settings</p>
+              <p className="text-sm text-muted">
+                {settings.email || "Add email in Admin → Settings"}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -39,7 +66,9 @@ export default function ContactPage() {
             </div>
             <div>
               <p className="font-medium">Phone / WhatsApp</p>
-              <p className="text-sm text-muted">Configure in Admin Settings</p>
+              <p className="text-sm text-muted">
+                {settings.whatsapp || settings.phone || "Add phone in Admin → Settings"}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -48,14 +77,16 @@ export default function ContactPage() {
             </div>
             <div>
               <p className="font-medium">Location</p>
-              <p className="text-sm text-muted">Configure in Admin Settings</p>
+              <p className="text-sm text-muted">
+                {settings.address || "Add address in Admin → Settings"}
+              </p>
             </div>
           </div>
         </div>
 
         <Card>
           {sent ? (
-            <p className="text-center text-primary font-medium">
+            <p className="text-center font-medium text-primary">
               Message sent! We&apos;ll get back to you soon.
             </p>
           ) : (

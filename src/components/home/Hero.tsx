@@ -2,24 +2,47 @@ import Link from "next/link";
 import { ArrowRight, Target, Users, Award } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
-export function Hero() {
+interface HeroProps {
+  title?: string;
+  subtitle?: string;
+  imageUrl?: string | null;
+}
+
+export function Hero({
+  title = "Train Smarter.\nLive Stronger.",
+  subtitle = "Personal coaching built around your body, your schedule, and your goals. No gimmicks — just sustainable strength and real results.",
+  imageUrl,
+}: HeroProps) {
+  const [line1, line2] = title.split("\n");
+
   return (
     <section className="relative overflow-hidden bg-primary text-white">
-      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
+      {imageUrl && (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imageUrl}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-primary/75" />
+        </>
+      )}
       <div className="relative mx-auto max-w-6xl px-4 py-24 md:py-32">
         <div className="max-w-2xl">
           <p className="mb-4 text-sm font-medium uppercase tracking-wider text-secondary">
             Personal Training Coach
           </p>
           <h1 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
-            Train Smarter.
-            <br />
-            Live Stronger.
+            {line1}
+            {line2 && (
+              <>
+                <br />
+                {line2}
+              </>
+            )}
           </h1>
-          <p className="mt-6 text-lg text-white/80">
-            Personal coaching built around your body, your schedule, and your goals.
-            No gimmicks — just sustainable strength and real results.
-          </p>
+          <p className="mt-6 text-lg text-white/80">{subtitle}</p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="/start">
               <Button variant="secondary" size="lg">
@@ -27,7 +50,11 @@ export function Hero() {
               </Button>
             </Link>
             <Link href="/book">
-              <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-white/30 text-white hover:bg-white/10"
+              >
                 Book Free Assessment
               </Button>
             </Link>

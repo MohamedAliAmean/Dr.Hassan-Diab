@@ -10,10 +10,10 @@ import { MediaUpload } from "@/components/admin/MediaUpload";
 import { STORAGE_BUCKETS } from "@/lib/constants";
 import type { SiteSetting } from "@/types/database";
 
-const SETTING_FIELDS = [
+const SITE_FIELDS = [
   { key: "trainer_name", label: "Trainer Name", type: "text" },
   { key: "tagline", label: "Tagline", type: "text" },
-  { key: "hero_title", label: "Hero Title", type: "text" },
+  { key: "hero_title", label: "Hero Title (use \\n for new line)", type: "text" },
   { key: "hero_subtitle", label: "Hero Subtitle", type: "textarea" },
   { key: "email", label: "Email", type: "email" },
   { key: "phone", label: "Phone", type: "tel" },
@@ -26,6 +26,8 @@ const SETTING_FIELDS = [
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
   useEffect(() => {
     async function load() {
       const supabase = createClient();
@@ -39,40 +41,77 @@ export default function AdminSettingsPage() {
     load();
   }, []);
 
+  async function saveKey(key: string, value: string) {
+    const supabase = createClient();
+    await supabase.from("site_settings").upsert({
+      key,
+      value,
+      updated_at: new Date().toISOString(),
+    });
+  }
+
   async function handleSave() {
     setSaving(true);
-    const supabase = createClient();
-    for (const [key, value] of Object.entries(settings)) {
-      await supabase
-        .from("site_settings")
-        .upsert({ key, value, updated_at: new Date().toISOString() });
+    setMessage(null);
+    try {
+      for (const [key, value] of Object.entries(settings)) {
+        await saveKey(key, value);
+      }
+      setMessage("Settings saved. Refresh the public site to see changes.");
+    } catch {
+      setMessage("Failed to save settings.");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
+  }
+
+  async function handleImageUpload(key: string, url: string) {
+    setSettings((prev) => ({ ...prev, [key]: url }));
+    await saveKey(key, url);
+    setMessage(`${key === "trainer_photo" ? "About photo" : "Hero image"} saved.`);
+  }
+
+  async function handleImageRemove(key: string) {
+    setSettings((prev) => ({ ...prev, [key]: "" }));
+    await saveKey(key, "");
+    setMessage("Image removed.");
   }
 
   return (
     <div>
       <h1 className="text-2xl font-bold">Settings</h1>
-      <p className="text-muted">Manage your profile and site configuration.</p>
+      <p className="text-muted">
+        Edit homepage, About page, contact info, and images from here.
+      </p>
+
+      {message && (
+        <p className="mt-4 rounded-lg bg-primary/10 px-4 py-3 text-sm text-primary">
+          {message}
+        </p>
+      )}
 
       <Card className="mt-6">
         <CardTitle>Site Information</CardTitle>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          {SETTING_FIELDS.map((field) => (
+          {SITE_FIELDS.map((field) => (
             <div key={field.key} className={field.type === "textarea" ? "md:col-span-2" : ""}>
               <label className="text-sm font-medium">{field.label}</label>
               {field.type === "textarea" ? (
                 <Textarea
                   className="mt-1"
                   value={settings[field.key] || ""}
-                  onChange={(e) => setSettings({ ...settings, [field.key]: e.target.value })}
+                  onChange={(e) =>
+                    setSettings({ ...settings, [field.key]: e.target.value })
+                  }
                 />
               ) : (
                 <Input
                   type={field.type}
                   className="mt-1"
                   value={settings[field.key] || ""}
-                  onChange={(e) => setSettings({ ...settings, [field.key]: e.target.value })}
+                  onChange={(e) =>
+                    setSettings({ ...settings, [field.key]: e.target.value })
+                  }
                 />
               )}
             </div>
@@ -81,22 +120,62 @@ export default function AdminSettingsPage() {
       </Card>
 
       <Card className="mt-6">
-        <CardTitle>Hero Image</CardTitle>
+        <CardTitle>About Page</CardTitle>
+        <p className="mt-1 text-sm text-muted">
+          This controls the public page: /about
+        </p>
+        <div className="mt-4 space-y-4">
+          <div>
+            <label className="text-sm font-medium">About Title</label>
+            <Input
+              className="mt-1"
+              value={settings.about_title || ""}
+              onChange={(e) =>
+                setSettings({ ...settings, about_title: e.target.value })
+              }
+              placeholder="About Hassan"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">About Text</label>
+            <Textarea
+              className="mt-1 min-h-[160px]"
+              value={settings.about_body || ""}
+              onChange={(e) =>
+                setSettings({ ...settings, about_body: e.target.value })
+              }
+              placeholder="Write the About page story here..."
+            />
+          </div>
+          <MediaUpload
+            bucket={STORAGE_BUCKETS.avatars}
+            folder="trainer"
+            accept="image/*"
+            label="Trainer Photo (shows on About page)"
+            currentUrl={settings.trainer_photo || null}
+            onUpload={(url) => handleImageUpload("trainer_photo", url)}
+            onRemove={() => handleImageRemove("trainer_photo")}
+          />
+        </div>
+      </Card>
+
+      <Card className="mt-6">
+        <CardTitle>Homepage Hero Image</CardTitle>
         <div className="mt-4">
           <MediaUpload
             bucket={STORAGE_BUCKETS.general}
             folder="hero"
             accept="image/*"
-            label="Homepage hero image"
+            label="Background image for homepage hero"
             currentUrl={settings.hero_image || null}
-            onUpload={(url) => setSettings({ ...settings, hero_image: url })}
-            onRemove={() => setSettings({ ...settings, hero_image: "" })}
+            onUpload={(url) => handleImageUpload("hero_image", url)}
+            onRemove={() => handleImageRemove("hero_image")}
           />
         </div>
       </Card>
 
       <Button className="mt-6" onClick={handleSave} disabled={saving}>
-        {saving ? "Saving..." : "Save Settings"}
+        {saving ? "Saving..." : "Save All Settings"}
       </Button>
     </div>
   );
