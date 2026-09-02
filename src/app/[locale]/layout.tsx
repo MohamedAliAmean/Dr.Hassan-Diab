@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { LocaleAttributes } from "@/components/i18n/LocaleAttributes";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 import { getDictionary, isLocale, type Locale } from "@/lib/i18n";
 
 export function generateStaticParams() {
@@ -27,6 +28,7 @@ export default async function LocaleLayout({
       <Header locale={locale} t={t} />
       <main className="flex-1">{children}</main>
       <Footer t={t} />
+      <ChatWidget />
     </>
   );
 }
